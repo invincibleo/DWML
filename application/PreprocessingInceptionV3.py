@@ -231,5 +231,9 @@ class PreprocessingInceptionV3(Preprocessing):
         return bottleneck_values
 
     def get_out_dataset(self):
-        return self.out_dataset
+        if self.out_dataset is not None:
+            return self.out_dataset
+        else:
+            self.extract()
+            return self.out_dataset
 

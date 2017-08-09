@@ -10,33 +10,31 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from core.ModelCompletion import ModelCompletion
+import re
+import os
+import keras
 
-class LearnerLastLayerMLP(ModelCompletion):
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.models import model_from_json
+import keras.backend as K
 
-    def __init__(self, name, dataset):
-        super(LearnerLastLayerMLP, self).__init__(name, dataset)
+from core.Learner import Learner
+from core.Metrics import *
+
+class LearnerLastLayerMLP(Learner):
 
     def learn(self):
-        ground_truth = {}
-        with open(GROUND_TRUTH_FILE, 'rb') as groundTruthFile:
-            list = groundTruthFile.readlines()
-            for row in list:
-                row = re.sub(r'\n', '', row)
-                buf = row.split(',')
-                label_row = buf[0]
-                ground_truth_row = buf[1].split('-')
-                ground_truth[label_row] = ground_truth_row
-
+        BOTTLENECK_TENSOR_SIZE = 2048
+        num_classes = self.dataset.get_num_classes()
         if not os.path.exists("tmp/model/model.json"):
             # create model
             model = Sequential()
             model.add(Dense(1024, input_dim=BOTTLENECK_TENSOR_SIZE, activation='relu'))
-            model.add(Dense(TOTAL_NUM_CLASSES, activation='softmax'))  # softmax sigmoid
+            model.add(Dense(num_classes, activation='softmax'))  # softmax sigmoid
 
             # Compile model
-            model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[
-                top3_accuracy])  # accuracy 'categorical_crossentropy' 'categorical_accuracy' multiclass_loss
+            model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])  # top3_accuracy accuracy 'categorical_crossentropy' 'categorical_accuracy' multiclass_loss
 
             # plot_model(model, filename='model.png', show_shapes=True, show_layer_names=True)
 
@@ -45,11 +43,10 @@ class LearnerLastLayerMLP(ModelCompletion):
                 histogram_freq=10, write_graph=True, write_images=True)
 
             hist = model.fit_generator(
-                generate_arrays_from_file(audio_lists, ground_truth, bottleneck_dir, 'training', batch_size),
+                self.dataset.generate_arrays_from_file(category='training', batch_size=self.FLAGS.train_batch_size),
                 steps_per_epoch=1,
                 epochs=100000,  # 1000000
-                validation_data=generate_arrays_from_file(audio_lists, ground_truth, bottleneck_dir, 'validation',
-                                                          batch_size),
+                validation_data=self.dataset.generate_arrays_from_file(category='validation', batch_size=self.FLAGS.validation_batch_size),
                 validation_steps=1,
                 verbose=2,
                 callbacks=[tensorboard]

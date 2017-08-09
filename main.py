@@ -11,12 +11,16 @@ import sys
 
 from application.Youtube8MDataset import *
 from core import *
+from core.util import *
+from application.LearnerLastLayerMLP import LearnerLastLayerMLP
 from application.PreprocessingInceptionV3 import PreprocessingInceptionV3
 
 def main(_):
     dataset = Youtube8MDataset('/media/invincibleo/Windows/Users/u0093839/Leo/Audioset', 10, 10, ['wav', 'mp3'])
-    aa = PreprocessingInceptionV3(FLAGS, dataset)
-    aa.extract()
+    dataset_preprocessing = PreprocessingInceptionV3(FLAGS, dataset).get_out_dataset()
+    dataset_khot = dataset_preprocessing.one_hot_encoding()
+    aa = LearnerLastLayerMLP('LearnerLastLayerMLP', dataset_khot, FLAGS)
+    aa.learn()
     print('a')
 
 

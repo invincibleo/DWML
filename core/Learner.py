@@ -17,9 +17,10 @@ from abc import abstractmethod
 class Learner(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, dataset):
+    def __init__(self, name, dataset, FLAGS):
         self.learner_name = name
         self.dataset = dataset
+        self.FLAGS = FLAGS
 
     @abstractmethod
     def learn(self):
