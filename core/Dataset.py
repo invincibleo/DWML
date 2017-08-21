@@ -14,6 +14,7 @@ import random
 
 from core.util import *
 from core.features import *
+from core.GeneralFileAccessor import GeneralFileAccessor
 from application.ontologyProcessing import OntologyProcessing
 
 class Dataset(object):
@@ -24,10 +25,12 @@ class Dataset(object):
         self.name = name
         if data_list is None:
             self.data_list = self.create_data_list()
+            self.dataset_dir = dataset_dir
         else:
             self.data_list = data_list
-        self.dataset_dir = dataset_dir
+            self.dataset_dir = None
         self.num_classes = len(self.data_list.keys())
+        self.is_stored = False
 
     def get_num_classes(self):
         """Returns the number of classes in the data set."""
@@ -70,6 +73,26 @@ class Dataset(object):
         for keys in self.data_list:
             validation_list = validation_list + self.data_list[keys]['validation']
         return validation_list
+
+    def save_dataset(self, new_base_dir, func):
+        ensure_dir_exists(new_base_dir)
+        for label_name, label_lists in self.data_list.items():
+            class_folder_addr = os.path.join(new_base_dir, label_name)
+            ensure_dir_exists()
+            for category in ['training', 'testing', 'validation']:
+                category_list = label_lists[category]
+                cate_folder_addr = os.path.join(class_folder_addr, category)
+                ensure_dir_exists(cate_folder_addr)
+                for index, data_name in enumerate(category_list):
+                    old_file_addr = get_data_file_path(self, label_name, data_name, self.dataset_dir)
+                    data = GeneralFileAccessor(old_file_addr).read()
+                    if func:
+                        new_data = func(data)
+
+                    new_file_addr = os.path.join(cate_folder_addr, data_name)
+                    GeneralFileAccessor(file_path=new_file_addr, data=new_data).write(new_data)
+
+
 
     def generate_arrays_from_file(self, category, batch_size=100):
         i = 0

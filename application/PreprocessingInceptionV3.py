@@ -25,7 +25,7 @@ from scipy.misc import imsave
 from core.PreProcessing import Preprocessing
 from core.Dataset import Dataset
 from core.util import *
-from core.GeneralReader import GeneralReader
+from core.GeneralFileAccessor import GeneralFileAccessor
 from application.Youtube8MDataset import Youtube8MDataset
 
 class PreprocessingInceptionV3(Preprocessing):
@@ -193,7 +193,7 @@ class PreprocessingInceptionV3(Preprocessing):
         data_path = get_data_file_path(dataset, label_name, data_name, dataset.get_dataset_dir())
         if not tf.gfile.Exists(data_path):
             tf.logging.fatal('File does not exist %s', data_path)
-        data_content = GeneralReader.read(data_path)
+        data_content = GeneralFileAccessor.read(data_path)
 
         bottleneck_string_total = ''
         for key, image_data in data_content.iteritems():
