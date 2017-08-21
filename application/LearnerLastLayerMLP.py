@@ -34,7 +34,9 @@ class LearnerLastLayerMLP(Learner):
             model.add(Dense(num_classes, activation='softmax'))  # softmax sigmoid
 
             # Compile model
-            model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])  # top3_accuracy accuracy 'categorical_crossentropy' 'categorical_accuracy' multiclass_loss
+            model.compile(loss='categorical_crossentropy',
+                          optimizer=keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.01),
+                          metrics=['categorical_accuracy'])  # top3_accuracy accuracy 'categorical_crossentropy' 'categorical_accuracy' multiclass_loss
 
             # plot_model(model, filename='model.png', show_shapes=True, show_layer_names=True)
 

@@ -29,3 +29,10 @@ class Preprocessing(object):
     @abstractmethod
     def extract(self):
         pass
+
+    def get_out_dataset(self):
+        if self.out_dataset is not None:
+            return self.out_dataset
+        else:
+            self.extract()
+            return self.out_dataset

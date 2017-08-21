@@ -12,6 +12,7 @@ from __future__ import print_function
 
 from core.files import *
 
+
 class GeneralReader(object):
     def __init__(self, file_path):
         self.audio_formats_static = ['wav', 'flac', 'm4a', 'webm']

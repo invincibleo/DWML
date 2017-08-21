@@ -230,10 +230,4 @@ class PreprocessingInceptionV3(Preprocessing):
         bottleneck_values = numpy.squeeze(bottleneck_values)
         return bottleneck_values
 
-    def get_out_dataset(self):
-        if self.out_dataset is not None:
-            return self.out_dataset
-        else:
-            self.extract()
-            return self.out_dataset
 

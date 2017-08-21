@@ -39,3 +39,35 @@ class OntologyProcessing(object):
         aso = OntologyProcessing.fetch_parents(aso)
         return aso
 
+    @staticmethod
+    def get_2nd_level_label_name_list(filename):
+        aso = OntologyProcessing.get_label_name_list(filename)
+        first_level_class = {}
+        for key, value in aso.items():
+            if not value['parents_ids']:
+                first_level_class[key] = value
+
+        second_level_class = {}
+        for key, value in aso.items():
+            try:
+                if value['parents_ids'].pop() in first_level_class.keys():
+                    second_level_class[key] = value
+            except IndexError:
+                continue
+        return second_level_class.keys()
+
+    @staticmethod
+    def get_2nd_level_class_label_index(label_code, aso, second_level_class):
+        # aso = OntologyProcessing.get_label_name_list(filename)
+        # second_level_class = OntologyProcessing.get_2nd_level_label_name_list(filename)
+        class_set = set()
+        for idx in range(0, len(label_code)):
+            buf = label_code[idx]
+            while buf not in second_level_class:
+                try:
+                    buf = aso[buf]['parents_ids'][0]
+                except IndexError:
+                    break
+            class_set.add(buf)
+
+        return list(class_set)

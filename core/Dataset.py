@@ -11,10 +11,10 @@ from __future__ import division
 from __future__ import print_function
 
 import random
-import numpy
 
 from core.util import *
-
+from core.features import *
+from application.ontologyProcessing import OntologyProcessing
 
 class Dataset(object):
     """A simple class for handling data sets."""
@@ -168,3 +168,158 @@ class Dataset(object):
 
         k_hot_dataset = Dataset('k_hot_encoding_dataset', dataset_dir, k_hot_data_list)
         return k_hot_dataset
+
+    def generate_arrays_from_file_a(self, category, batch_size=100):
+        i = 0
+        X = []
+        Y = []
+        if category == 'training':
+            working_list = self.get_training_files()
+        elif category == 'validation':
+            working_list = self.get_validation_files()
+        elif category == 'testing':
+            working_list = self.get_testing_files()
+
+        num_data_files = len(working_list)
+        classes_ordered = [x for x in self.data_list.keys()]
+        classes_ordered = numpy.sort(classes_ordered)
+        while (1):
+            data_idx = random.randrange(num_data_files)
+            data_name = working_list[data_idx][0]
+            label_idx = working_list[data_idx][1]
+            first_label = int(label_idx.split(',')[0])
+            label_name = classes_ordered[first_label]
+
+            bottleneck_path = get_data_file_path(self, label_name, data_name, self.dataset_dir)
+
+            bottleneck = self.extract(bottleneck_path) ######### xin jia
+            bottleneck = bottleneck.values()
+            bottleneck = numpy.reshape(bottleneck, (-1, 1, 96*20))
+            bottleneck = numpy.squeeze(bottleneck, axis=1)
+            if bottleneck.shape[0] <= 0:
+                continue
+
+            # bottleneck = numpy.concatenate((bottleneck, numpy.zeros((bottleneck.shape[0], 140 - bottleneck.shape[1]))), axis=1)
+            # bottleneck = numpy.concatenate((bottleneck, numpy.zeros((140 - bottleneck.shape[0], bottleneck.shape[1]))), axis=0)
+
+
+            hot_label = numpy.zeros(self.num_classes, numpy.int8)
+            for idx in label_idx.split(','):
+                hot_label[int(idx)] = 1
+
+            if not len(X) and not len(Y):
+                X = bottleneck
+                Y = numpy.matlib.repmat(hot_label, m=bottleneck.shape[0], n=1) #numpy.size(bottleneck, 0)/96
+            else:
+                X = numpy.append(X, bottleneck, 0)
+                Y = numpy.append(Y, numpy.matlib.repmat(hot_label, m=bottleneck.shape[0], n=1), 0)
+
+            try:
+                if X.shape[0] >= batch_size:
+                    X = numpy.reshape(X, (X.shape[0], -1, 20))  #######you wen ti
+                    X = numpy.expand_dims(X, axis=3)
+                    Y = numpy.reshape(Y, (-1, self.num_classes))
+                    if X.shape[0] >= batch_size and Y.shape[0] >= batch_size:
+                        yield (X, Y)
+                        i = 0
+                        X = []
+                        Y = []
+            except:
+                i = 0
+                X = []
+                Y = []
+
+    def get_batch_data(self, category, batch_size=100):
+        i = 0
+        X = []
+        Y = []
+        if category == 'training':
+            working_list = self.get_training_files()
+        elif category == 'validation':
+            working_list = self.get_validation_files()
+        elif category == 'testing':
+            working_list = self.get_testing_files()
+
+        num_data_files = len(working_list)
+        classes_ordered = [x for x in self.data_list.keys()]
+        classes_ordered = numpy.sort(classes_ordered)
+        while (1):
+            data_idx = random.randrange(num_data_files)
+            data_name = working_list[data_idx][0]
+            label_idx = working_list[data_idx][1]
+            first_label = int(label_idx.split(',')[0])
+            label_name = classes_ordered[first_label]
+
+            bottleneck_path = get_data_file_path(self, label_name, data_name, self.dataset_dir)
+
+            bottleneck = self.extract(bottleneck_path) ######### xin jia
+            bottleneck = bottleneck.values()
+            bottleneck = numpy.reshape(bottleneck, (-1, 1, 96*64))
+            bottleneck = numpy.squeeze(bottleneck, axis=1)
+            if bottleneck.shape[0] <= 0:
+                continue
+
+            # bottleneck = numpy.concatenate((bottleneck, numpy.zeros((bottleneck.shape[0], 140 - bottleneck.shape[1]))), axis=1)
+            # bottleneck = numpy.concatenate((bottleneck, numpy.zeros((140 - bottleneck.shape[0], bottleneck.shape[1]))), axis=0)
+
+
+            hot_label = numpy.zeros(self.num_classes, numpy.int8)
+            for idx in label_idx.split(','):
+                hot_label[int(idx)] = 1
+
+            if not len(X) and not len(Y):
+                X = bottleneck
+                Y = numpy.matlib.repmat(hot_label, m=bottleneck.shape[0], n=1) #numpy.size(bottleneck, 0)/96
+            else:
+                X = numpy.append(X, bottleneck, 0)
+                Y = numpy.append(Y, numpy.matlib.repmat(hot_label, m=bottleneck.shape[0], n=1), 0)
+
+            try:
+                if X.shape[0] >= batch_size:
+                    X = numpy.reshape(X, (X.shape[0], -1, 64))  #######you wen ti
+                    X = numpy.expand_dims(X, axis=3)
+                    Y = numpy.reshape(Y, (-1, self.num_classes))
+                    if X.shape[0] >= batch_size and Y.shape[0] >= batch_size:
+                        return (X, Y)
+                        i = 0
+                        X = []
+                        Y = []
+            except:
+                i = 0
+                X = []
+                Y = []
+
+    @staticmethod
+    def extract(audio_file):
+        feature_extractor = FeatureExtractor(overwrite=False, store=False)
+        y, fs = AudioFile().load(filename=audio_file, mono=True, fs=44100)
+
+        y = numpy.reshape(y, [1, -1])
+
+        for channel in range(0, y.shape[0]):
+            buf = y[channel]
+            mean_value = numpy.mean(buf)
+            buf -= mean_value
+            max_value = max(abs(buf)) + 0.005
+            y[channel] = buf / max_value
+
+        # feature_data = feature_extractor.extract(audio_file=y)
+        # feature_data = feature_data.get_path('mel.feat')
+        # feature = numpy.reshape(feature_data, (-1, 64))[:960, :]
+
+        feature = {}
+        for i in range(10):
+            frame_start = int(i * 0.96 * fs)
+            fram_end = int((i + 1) * 0.96 * fs) - 1
+
+            # some audio files have duration less than 10sec
+            if frame_start > y.shape[1] or fram_end > y.shape[1]:
+                break
+            raw_audio = y[:, frame_start:fram_end]
+            feature_data = feature_extractor.extract(audio_file=raw_audio)
+            feature_data = feature_data.get_path('mfcc.feat')
+            feature_data = numpy.reshape(feature_data, (1, 96 * 20))
+            # feature = feature + numpy.squeeze(feature_data, 0)
+            # feature[i] = feature_data
+            feature[i] = feature_data
+        return feature

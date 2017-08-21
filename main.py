@@ -13,14 +13,17 @@ from application.Youtube8MDataset import *
 from core import *
 from core.util import *
 from application.LearnerLastLayerMLP import LearnerLastLayerMLP
+from application.LearnerInceptionV3 import LearnerInceptionV3
 from application.PreprocessingInceptionV3 import PreprocessingInceptionV3
+from application.PreprocessingMelFreq import PreprocessingMelFreq
 
 def main(_):
     dataset = Youtube8MDataset('/media/invincibleo/Windows/Users/u0093839/Leo/Audioset', 10, 10, ['wav', 'mp3'])
-    dataset_preprocessing = PreprocessingInceptionV3(FLAGS, dataset).get_out_dataset()
-    dataset_khot = dataset_preprocessing.one_hot_encoding()
-    aa = LearnerLastLayerMLP('LearnerLastLayerMLP', dataset_khot, FLAGS)
+    # dataset_preprocessing = PreprocessingInceptionV3(FLAGS, dataset).get_out_dataset()
+    dataset_khot = dataset.one_hot_encoding()
+    aa = LearnerInceptionV3('LearnerInceptionV3', dataset_khot, FLAGS)
     aa.learn()
+    # aa.predict()
     print('a')
 
 

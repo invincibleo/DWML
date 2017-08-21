@@ -193,8 +193,8 @@ import numpy
 import logging
 import soundfile
 import copy
-from .decorators import before_and_after_function_wrapper
-from .containers import DottedDict
+from core.decorators import before_and_after_function_wrapper
+from core.containers import DottedDict
 
 
 class FileMixin(object):

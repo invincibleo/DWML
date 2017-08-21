@@ -21,9 +21,15 @@ import re
 import hashlib
 import os.path
 import cPickle as pickle
+import numpy
+import random
+
 
 from tqdm import tqdm
 from itertools import islice
+from core.features import *
+from core.util import *
+
 import tensorflow as tf
 
 class Youtube8MDataset(Dataset):
@@ -31,7 +37,7 @@ class Youtube8MDataset(Dataset):
         """Initialize dataset using a subset and the path to the data."""
 
         self.name = 'Youtube8M'
-        self.num_classes = 527
+        self.num_classes = 43
         self.dataset_dir = dataset_dir
         self.testing_percentage = testing_percentage
         self.validation_percentage = validation_percentage
@@ -76,6 +82,7 @@ class Youtube8MDataset(Dataset):
                 return None
 
             aso = OntologyProcessing.get_label_name_list(os.path.join(os.path.dirname(__file__), 'ontology.json'))
+            second_level_class = OntologyProcessing.get_2nd_level_label_name_list(os.path.join(os.path.dirname(__file__), 'ontology.json'))
             with open(os.path.join(os.path.split(os.path.realpath(__file__))[0], os.path.join(os.path.dirname(__file__), 'balanced_train_segments.csv')), 'rb') as csvfile:
                 label_list = csv.reader(csvfile, delimiter=',')
 
@@ -100,7 +107,10 @@ class Youtube8MDataset(Dataset):
                         percentage_hash = ((int(hash_name_hashed, 16) % (self.max_num_data_per_class + 1)) *
                                            (100.0 / self.max_num_data_per_class))
                         for label in file_label:
-                            label_name = aso[label]['name']
+                            second_level_class_name = OntologyProcessing.get_2nd_level_class_label_index([label], aso, second_level_class)
+                            label_name = aso[second_level_class_name[0]]['name']  ###label
+                            if label_name == 'Animal':
+                                continue
                             if not label_name in result.keys():
                                 result[label_name] = {'subdir': '', 'validation': [], 'testing': [], 'training': []}
 
