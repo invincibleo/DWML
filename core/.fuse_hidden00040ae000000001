@@ -163,7 +163,7 @@ class Dataset(object):
                     # one_hot_label[-1, idx] = 1
                     one_hot_data_list[label_name][category].append((data_name, idx))
 
-        from application.DCASE2017Task3Dataset import DCASE2017Task3Dataset
+        eval('from application.' + self.name + 'import' + self.name)
         one_hot_dataset = eval(self.name)(dataset_dir=dataset_dir, data_list=one_hot_data_list)
         return one_hot_dataset
 

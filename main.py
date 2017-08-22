@@ -16,10 +16,14 @@ from application.LearnerLastLayerMLP import LearnerLastLayerMLP
 from application.LearnerInceptionV3 import LearnerInceptionV3
 from application.PreprocessingInceptionV3 import PreprocessingInceptionV3
 from application.PreprocessingMelFreq import PreprocessingMelFreq
+from application.DCASE2017Task3Dataset import DCASE2017Task3Dataset
 
 def main(_):
-    dataset = Youtube8MDataset('/media/invincibleo/Windows/Users/u0093839/Leo/Audioset', 10, 10, ['wav', 'mp3'])
+    # dataset = Youtube8MDataset('/media/invincibleo/Windows/Users/u0093839/Leo/Audioset', 10, 10, ['wav', 'mp3'])
     # dataset_preprocessing = PreprocessingInceptionV3(FLAGS, dataset).get_out_dataset()
+    dataset = DCASE2017Task3Dataset(
+        dataset_dir='/media/invincibleo/Windows/Users/u0093839/Box Sync/PhD/Experiment/SoundEventRecognition/DCASE2017-baseline-system-master/applications/data/TUT-sound-events-2017-development',
+        testing_percentage=20, validation_percentage=20, extensions=['wav', 'mp3'])
     dataset_khot = dataset.one_hot_encoding()
     aa = LearnerInceptionV3('LearnerInceptionV3', dataset_khot, FLAGS)
     aa.learn()

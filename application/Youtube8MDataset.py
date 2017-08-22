@@ -36,7 +36,7 @@ class Youtube8MDataset(Dataset):
     def __init__(self, dataset_dir, testing_percentage, validation_percentage, extensions=['wav', 'mp3']):
         """Initialize dataset using a subset and the path to the data."""
 
-        self.name = 'Youtube8M'
+        self.name = 'Youtube8MDataset'
         self.num_classes = 43
         self.dataset_dir = dataset_dir
         self.testing_percentage = testing_percentage

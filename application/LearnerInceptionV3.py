@@ -356,9 +356,9 @@ def InceptionV3(include_top=True,
     if include_top:
         # Classification block
         x = GlobalAveragePooling2D(name='avg_pool')(x)
-        # x = Dropout(rate=0.8)(x)   ####### added by me
         x = Dense(512, activation='relu', name='2ndLastPrediction')(x)   #####change softmax to sigmoid
-        x = Dense(classes, activation='softmax', name='predictions')(x)   #####change softmax to sigmoid
+        x = Dropout(rate=0.5)(x)   ####### added by me
+        x = Dense(classes, activation='sigmoid', name='predictions')(x)   #####change softmax to sigmoid
 
     else:
         if pooling == 'avg':
@@ -408,9 +408,9 @@ class LearnerInceptionV3(Learner):
         if not os.path.exists("tmp/model/model.json"):
 
             # model = Sequential()
-            # model.add(Dense(43, input_dim=96*40, activation='sigmoid'))#InceptionV3(weights=None, classes=527)
+            # model.add(Dense(43, input_dim=96*20, activation='sigmoid'))#InceptionV3(weights=None, classes=527)
 
-            model = InceptionV3(weights=None, classes=43)
+            model = InceptionV3(weights=None, classes=6)
 
             # Compile model
             model.compile(loss='categorical_crossentropy',
