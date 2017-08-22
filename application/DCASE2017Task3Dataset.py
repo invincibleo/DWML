@@ -69,6 +69,7 @@ class DCASE2017Task3Dataset(Dataset):
         meta_file_addr = os.path.join(self.dataset_dir, 'meta.txt')
         meta_content = GeneralFileAccessor(meta_file_addr).read()
 
+        self.event_roll = {}   #######
         data_list = {}
         line_idx = 0
         audio_frame_size = 1
@@ -80,6 +81,8 @@ class DCASE2017Task3Dataset(Dataset):
             end_time = float(line_list[3])
             label_name = line_list[4]
             duration = end_time - start_time
+
+            audio_meta_file_addr = os.path.join(os.path.join(self.dataset_dir, 'meta'), file_name.split('.')[0])######
             if duration >= audio_frame_size:
                 i = 0
                 while (int(duration / audio_frame_size)):
