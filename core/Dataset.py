@@ -39,7 +39,7 @@ class Dataset(object):
         return ['train', 'validation']
 
     def create_data_list(self):
-        return -1
+        pass
 
     def get_dataset_dir(self):
         return self.dataset_dir
