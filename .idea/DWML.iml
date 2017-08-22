@@ -6,6 +6,11 @@
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
+<<<<<<< HEAD
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />
+=======
+    <option name="projectConfiguration" value="Nosetests" />
+    <option name="PROJECT_TEST_RUNNER" value="Nosetests" />
+>>>>>>> b8d09252a4c9a085bfb7ca1c7a583b0d62a046bb
   </component>
 </module>
